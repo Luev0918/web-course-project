@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vite + Vue</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/dayjs@1.10.7/dayjs.min.js"></script>
+  <script src="https://unpkg.com/dayjs@1.10.7/locale/zh-cn.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    :root {
+      --primary-color: #0084ff;
+      --bg-color: #f6f6f6;
+      --text-color: #1a1a1a;
+      --card-bg: white;
+      --border-color: #e7e7e7;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* default */
+    .default {
+      --primary-color: #0084ff;
+      --bg-color: #f6f6f6;
+      --text-color: #1a1a1a;
+      --card-bg: white;
+      --border-color: #e7e7e7;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* spring */
+    .spring {
+      --primary-color: #4caf50;
+      --bg-color: #f1f8e9;
+      --text-color: #1b5e20;
+      --card-bg: #e8f5e9;
+      --border-color: #c8e6c9;
+      --shadow-color: rgba(76, 175, 80, 0.2);
+    }
+    
+    /* peaple */
+    .peaple {
+      --primary-color: #f1403c;
+      --bg-color: #ffebee;
+      --text-color: #b71c1c;
+      --card-bg: #ffcdd2;
+      --border-color: #ef9a9a;
+      --shadow-color: rgba(241, 64, 60, 0.2);
+    }
+    
+    /* dark */
+    .dark {
+      --primary-color: #6ab7ff;
+      --bg-color: #1a1a1a;
+      --text-color: #e6e6e6;
+      --card-bg: #2d2d2d;
+      --border-color: #444;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 15px 20px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+    
+    .app-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .app-title h1 {
+      color: var(--primary-color);
+      font-size: 24px;
+    }
+    
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .theme-label {
+      font-weight: 500;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+    
+    .theme-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .theme-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+    
+    .theme-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .theme-btn i {
+      margin-right: 5px;
+    }
+    
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    
+    .logo {
+      height: 5em;
+      padding: 1.5em;
+      will-change: filter;
+      transition: filter 300ms;
+    }
+    .logo:hover {
+      filter: drop-shadow(0 0 2em #646cffaa);
+    }
+    .logo.vue:hover {
+      filter: drop-shadow(0 0 2em #42b883aa);
+    }
+    
+    .info-section {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px var(--shadow-color);
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .button-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .button-warning {
+      background-color: #ff9800;
+      color: white;
+    }
+    
+    .button-danger {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .button-info {
+      background-color: #2196f3;
+      color: white;
+    }
+    
+    /* 知乎热榜样式 */
+    .zhihu-hot {
+      margin-top: 30px;
+    }
+    
+    .zhihu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 15px 20px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+    
+    .zhihu-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary-color);
+    }
+    
+    .zhihu-title i {
+      font-size: 24px;
+    }
+    
+    .search-box {
+      margin: 15px 0;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      font-size: 14px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      box-shadow: 0 2px 6px var(--shadow-color);
+    }
+    
+    .tabs {
+      display: flex;
+      background-color: var(--card-bg);
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      box-shadow: 0 2px 6px var(--shadow-color);
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #8590a6;
+      position: relative;
+      flex: 1;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .tab.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary-color);
+    }
+    
+    .hot-list {
+      background-color: var(--card-bg);
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .list-item {
+      display: flex;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.2s;
+    }
+    
+    .list-item:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .rank {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1403c;
+      min-width: 40px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .rank.top-three {
+      color: #f1403c;
+    }
+    
+    .content {
+      flex: 1;
+    }
+    
+    .title {
+      font-size: 16px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+    
+    .title:hover {
+      color: var(--primary-color);
+    }
+    
+    .metrics {
+      display: flex;
+      font-size: 14px;
+      color: #8590a6;
+    }
+    
+    .metrics span {
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .excerpt {
+      font-size: 14px;
+      color: #646464;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    
+    .loading, .error {
+      text-align: center;
+      padding: 40px;
+      color: #8590a6;
+    }
+    
+    .error {
+      color: #f1403c;
+    }
+    
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #8590a6;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    
+    @media (max-width: 600px) {
+      .app-header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .theme-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .tabs {
+        flex-wrap: wrap;
+      }
+      
+      .tab {
+        flex: 1 0 33%;
+      }
+      
+      .list-item {
+        padding: 12px 15px;
+        flex-direction: column;
+      }
+      
+      .rank {
+        min-width: 30px;
+        margin-bottom: 10px;
+        justify-content: flex-start;
+      }
+      
+      .metrics {
+        flex-wrap: wrap;
+      }
+      
+      .metrics span {
+        margin-right: 10px;
+        margin-bottom: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    const { createApp, ref, onMounted, computed } = Vue;
+    
+    // 设置dayjs中文
+    dayjs.locale('zh-cn');
+    
+    // 定义Person类（模拟@bmh/tools）
+    class Person {
+      constructor(name, slogan) {
+        this.name = name;
+        this.slogan = slogan;
+      }
+    }
+    
+    // 定义知乎热榜数据接口类型
+    const ZhihuHotItem = {
+      id: Number,
+      title: String,
+      url: String,
+      excerpt: String,
+      metrics: {
+        answer_count: Number,
+        comment_count: Number,
+        follower_count: Number,
+        vote_count: Number
+      },
+      type: String,
+      rank: Number
+    };
+    
+    // 模拟知乎热榜数据
+    const mockZhihuHotData = [
+      {
+        id: 1,
+        title: "如何看待最新人工智能GPT-4的发布？",
+        url: "https://www.zhihu.com/question/123456789",
+        excerpt: "OpenAI发布了新一代人工智能模型GPT-4，在多个领域展现出惊人能力...",
+        metrics: {
+          answer_count: 1245,
+          comment_count: 3678,
+          follower_count: 9821,
+          vote_count: 45672
+        },
+        type: "digital",
+        rank: 1
+      },
+      {
+        id: 2,
+        title: "中国航天最新突破意味着什么？",
+        url: "https://www.zhihu.com/question/123456790",
+        excerpt: "中国航天科技集团宣布成功实现了一项关键技术突破，这将大幅提升我国太空探索能力...",
+        metrics: {
+          answer_count: 876,
+          comment_count: 2345,
+          follower_count: 6543,
+          vote_count: 32109
+        },
+        type: "science",
+        rank: 2
+      },
+      {
+        id: 3,
+        title: "世界杯冠军阿根廷队回国受到热烈欢迎",
+        url: "https://www.zhihu.com/question/123456791",
+        excerpt: "阿根廷队夺得世界杯冠军后返回国内，受到球迷热烈欢迎，场面感人...",
+        metrics: {
+          answer_count: 765,
+          comment_count: 1987,
+          follower_count: 5432,
+          vote_count: 28765
+        },
+        type: "sports",
+        rank: 3
+      },
+      {
+        id: 4,
+        title: "最新科幻电影《星际穿越2》首映口碑爆棚",
+        url: "https://www.zhihu.com/question/123456792",
+        excerpt: "诺兰导演的《星际穿越2》在全球首映后获得观众和影评人的一致好评...",
+        metrics: {
+          answer_count: 543,
+          comment_count: 1654,
+          follower_count: 4321,
+          vote_count: 21543
+        },
+        type: "entertainment",
+        rank: 4
+      },
+      {
+        id: 5,
+        title: "研究发现每天喝咖啡可能延长寿命",
+        url: "https://www.zhihu.com/question/123456793",
+        excerpt: "一项长达10年的研究发现，适量饮用咖啡与较低的全因死亡率相关...",
+        metrics: {
+          answer_count: 432,
+          comment_count: 1432,
+          follower_count: 3765,
+          vote_count: 18765
+        },
+        type: "science",
+        rank: 5
+      }
+    ];
+    
+    // 主题切换组合式函数
+    const useTheme = () => {
+      const theme = ref('default');
+      
+      // 从本地存储获取主题偏好
+      onMounted(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+          theme.value = savedTheme;
+        }
+        document.documentElement.className = theme.value;
+      });
+      
+      // 切换主题
+      const setTheme = (newTheme) => {
+        theme.value = newTheme;
+        document.documentElement.className = newTheme;
+        localStorage.setItem('theme', newTheme);
+      };
+      
+      return {
+        theme,
+        setTheme
+      };
+    };
+    
+    // HelloWorld组件（简化版）
+    const HelloWorld = {
+      props: {
+        msg: String
+      },
+      template: `
+        <div class="info-section">
+          <h2>{{ msg }}</h2>
+          
+        </div>
+      `
+    };
+    
+    // 知乎热榜组件
+    const ZhihuHot = {
+      setup() {
+        const data = ref([]);
+        const filteredData = ref([]);
+        const currentFilter = ref('all');
+        const searchTerm = ref('');
+        const isLoading = ref(false);
+        const error = ref(null);
+        
+        // 获取数据
+        const fetchData = () => {
+          isLoading.value = true;
+          error.value = null;
+          
+          // 模拟API请求延迟
+          setTimeout(() => {
+            try {
+              data.value = mockZhihuHotData;
+              filterData();
+              isLoading.value = false;
+            } catch (err) {
+              error.value = '获取数据失败，请刷新重试';
+              isLoading.value = false;
+            }
+          }, 800);
+        };
+        
+        // 过滤数据
+        const filterData = () => {
+          filteredData.value = data.value.filter(item => {
+            const matchesType = currentFilter.value === 'all' || item.type === currentFilter.value;
+            const matchesSearch = searchTerm.value === '' || 
+                                item.title.toLowerCase().includes(searchTerm.value) ||
+                                item.excerpt.toLowerCase().includes(searchTerm.value);
+            return matchesType && matchesSearch;
+          });
+        };
+        
+        // 切换分类
+        const changeFilter = (filter) => {
+          currentFilter.value = filter;
+          filterData();
+        };
+        
+        // 搜索处理
+        const handleSearch = (e) => {
+          searchTerm.value = e.target.value.toLowerCase();
+          filterData();
+        };
+        
+        // 初始化
+        onMounted(() => {
+          fetchData();
+        });
+        
+        return {
+          filteredData,
+          currentFilter,
+          searchTerm,
+          isLoading,
+          error,
+          changeFilter,
+          handleSearch,
+          fetchData
+        };
+      },
+      template: `
+        <div class="zhihu-hot">
+          <div class="zhihu-header">
+            <div class="zhihu-title">
+              <i class="fas fa-fire"></i>
+              <h2>知乎热榜</h2>
+            </div>
+            <button class="refresh-btn" @click="fetchData">
+              <i class="fas fa-sync-alt"></i>
+              刷新
+            </button>
+          </div>
+          
+          <div class="search-box">
+            <input 
+              type="text" 
+              placeholder="搜索热榜内容..." 
+              :value="searchTerm" 
+              @input="handleSearch"
+            >
+          </div>
+          
+          <div class="tabs">
+            <div 
+              :class="['tab', currentFilter === 'all' ? 'active' : '']" 
+              @click="changeFilter('all')"
+            >全部</div>
+            <div 
+              :class="['tab', currentFilter === 'science' ? 'active' : '']" 
+              @click="changeFilter('science')"
+            >科学</div>
+            <div 
+              :class="['tab', currentFilter === 'digital' ? 'active' : '']" 
+              @click="changeFilter('digital')"
+            >数码</div>
+            <div 
+              :class="['tab', currentFilter === 'sports' ? 'active' : '']" 
+              @click="changeFilter('sports')"
+            >体育</div>
+            <div 
+              :class="['tab', currentFilter === 'entertainment' ? 'active' : '']" 
+              @click="changeFilter('entertainment')"
+            >娱乐</div>
+          </div>
+          
+          <div class="hot-list">
+            <div v-if="isLoading" class="loading">
+              <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
+            <div v-else-if="error" class="error">
+              <i class="fas fa-exclamation-triangle"></i> {{ error }}
+            </div>
+            <template v-else>
+              <div v-if="filteredData.length === 0" class="loading">没有找到相关内容</div>
+              <div 
+                v-for="item in filteredData" 
+                :key="item.id" 
+                class="list-item"
+              >
+                <div :class="['rank', item.rank <= 3 ? 'top-three' : '']">{{ item.rank }}</div>
+                <div class="content">
+                  <div class="title" @click="window.open(item.url, '_blank')">{{ item.title }}</div>
+                  <div class="metrics">
+                    <span><i class="fas fa-comment"></i> 回答: {{ item.metrics.answer_count }}</span>
+                    <span><i class="fas fa-thumbs-up"></i> 赞同: {{ item.metrics.vote_count }}</span>
+                    <span><i class="fas fa-eye"></i> 关注: {{ item.metrics.follower_count }}</span>
+                  </div>
+                  <div class="excerpt">{{ item.excerpt }}</div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      `
+    };
+    
+    // 主应用组件
+    const App = {
+      setup() {
+        const { theme, setTheme } = useTheme();
+        const msg = " ";
+        const p = new Person("柏明虹", "math is my planB");
+        
+        const onThemeChange = (newTheme) => {
+          setTheme(newTheme);
+        };
+        
+        return {
+          theme,
+          msg,
+          p,
+          dayjs: window.dayjs,
+          onThemeChange
+        };
+      },
+      components: {
+        HelloWorld,
+        ZhihuHot
+      },
+      template: `
+        <div class="container">
+          <header class="app-header">
+            <div class="app-title">
+              <i class="fas fa-code"></i>
+              <h1>{{ msg }}</h1>
+            </div>
+            <div class="theme-switcher">
+              <span class="theme-label">主题:</span>
+              <div class="theme-buttons">
+                <button 
+                  :class="['theme-btn', theme === 'default' ? 'active' : '']" 
+                  @click="onThemeChange('default')"
+                >
+                  <i class="fas fa-sun"></i>default
+                </button>
+                <button 
+                  :class="['theme-btn', theme === 'spring' ? 'active' : '']" 
+                  @click="onThemeChange('spring')"
+                >
+                  <i class="fas fa-leaf"></i>spring
+                </button>
+                <button 
+                  :class="['theme-btn', theme === 'peaple' ? 'active' : '']" 
+                  @click="onThemeChange('peaple')"
+                >
+                  <i class="fas fa-heart"></i>peaple
+                </button>
+                <button 
+                  :class="['theme-btn', theme === 'dark' ? 'active' : '']" 
+                  @click="onThemeChange('dark')"
+                >
+                  <i class="fas fa-moon"></i>dark
+                </button>
+              </div>
+            </div>
+          </header>
+          
+          <div class="logo-container">
+            <a href="https://vite.dev" target="_blank">
+              <img src="https://vite.dev/logo.svg" class="logo" alt="Vite logo" />
+            </a>
+            <a href="https://vuejs.org/" target="_blank">
+              <img src="https://vuejs.org/images/logo.png" class="logo vue" alt="Vue logo" />
+            </a>
+          </div>
+          
+          <div class="info-section">
+            <div>{{ dayjs().format("YYYY年MM月DD日 HH:mm:ss") }}</div>
+            <div>{{ p.name + ":" + p.slogan }}</div>
+          </div>
+          
+          <div class="button-group">
+            <button class="button-primary">primary</button>
+            <button class="button-warning">warning</button>
+            <button class="button-danger">danger</button>
+            <button class="button-info">info</button>
+          </div>
+          
+          <HelloWorld :msg="msg" />
+          
+          <ZhihuHot />
+          
+          <footer>
+            <p>数据来源于知乎 • 仅供参考 • 暗黑模式已支持</p>
+          </footer>
+        </div>
+      `
+    };
+    
+    // 创建Vue应用
+    const app = createApp(App);
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+	"dependencies": {
+		"dayjs": "^1.11.18",
+		"nrm": "^2.1.0"
+	},
+	"devDependencies": {
+		"@types/postcss-pxtorem": "^6.1.0",
+		"@unocss/preset-rem-to-px": "^66.5.0",
+		"postcss-pxtorem": "^6.1.0",
+		"unocss": "^66.5.0"
+	}
+}

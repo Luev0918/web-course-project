@@ -1,0 +1,19 @@
+{
+    "name": "my-theme",
+    "displayName": "my-theme",
+    "description": "我的主题",
+    "categories":["Themes"],
+    "version": "0.0.1",
+    "publisher": "my",
+    "engines":{"vscode":"*"},
+    "contributes": { 
+        "themes": [
+            {
+                "id":"my-theme",
+                "label": "my-theme",  
+                "uiTheme": "vs", 
+                "path": "./mytheme.json" 
+            }
+                  ]
+                    }
+}

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* 暗黑主题 */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #3498db;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-theme header {
+            background-color: #2c3e50;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+        
+        .left-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .right-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .time-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d1f0d1;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            font-weight: 500;
+            color: #2c3e50;
+            z-index: 1000;
+            border: 1px solid #a3d8a3;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-theme .time-display {
+            background-color: #2d4d2d;
+            color: #d1f0d1;
+            border: 1px solid #3a5f3a;
+        }
+        
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #3498db;
+            color: white;
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-theme .btn {
+            background-color: #5dade2;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .language-select {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #e1e4e8;
+            background-color: white;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        body.dark-theme .language-select {
+            border: 2px solid #444;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+        }
+        
+        /* 圆形扩散效果 */
+        .ripple-effect {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        body.dark-theme .ripple-effect {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: translate(-50%, -50%) scale(20);
+                opacity: 0;
+            }
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            min-height: 400px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.dark-theme .content-area {
+            background: #2d2d2d;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 歌曲列表样式 */
+        .song-list {
+            text-align: center;
+        }
+        
+        .song-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        body.dark-theme .song-item {
+            background-color: #2a2a2a;
+        }
+        
+        .song-id {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .song-img {
+            width: 130px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .song-info {
+            flex: 1;
+        }
+        
+        .song-singer {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        
+        .song-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .song-date {
+            text-align: right;
+            color: #6c757d;
+        }
+        
+        body.dark-theme .song-date {
+            color: #adb5bd;
+        }
+        
+        /* 知乎热榜样式 */
+        .zhihu-hot {
+            padding: 10px;
+        }
+        
+        .zhihu-item {
+            padding: 10px;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            align-items: center;
+        }
+        
+        body.dark-theme .zhihu-item {
+            border-bottom: 1px solid #444;
+        }
+        
+        .zhihu-rank {
+            font-weight: bold;
+            margin-right: 15px;
+            color: #ff9500;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .zhihu-title {
+            flex: 1;
+        }
+        
+        .zhihu-hotscore {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        body.dark-theme .zhihu-hotscore {
+            color: #ccc;
+        }
+        
+        /* 翻译插件样式 */
+        .translate-plugin {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            z-index: 1000;
+            width: 500px;
+            max-width: 90%;
+        }
+        
+        body.dark-theme .translate-plugin {
+            background: #2d2d2d;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .translate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        .translate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        body.dark-theme .translate-header {
+            border-bottom: 1px solid #444;
+        }
+        
+        .translate-title {
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+        
+        .translate-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f1f1f1;
+        }
+        
+        body.dark-theme .translate-close {
+            background: #3d3d3d;
+        }
+        
+        .translate-close:hover {
+            background: #e5e5e5;
+        }
+        
+        body.dark-theme .translate-close:hover {
+            background: #4d4d4d;
+        }
+        
+        .translate-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            resize: vertical;
+            min-height: 120px;
+            font-size: 1rem;
+        }
+        
+        body.dark-theme .translate-input {
+            border: 1px solid #444;
+            background-color: #3d3d3d;
+            color: #f0f0f0;
+        }
+        
+        .translate-output {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            min-height: 120px;
+            font-size: 1rem;
+        }
+        
+        body.dark-theme .translate-output {
+            border: 1px solid #444;
+            background-color: #3d3d3d;
+            color: #f0f0f0;
+        }
+        
+        .translate-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        body.dark-theme .translate-btn {
+            background-color: #5dade2;
+        }
+        
+        .translate-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .translate-hint {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        body.dark-theme .translate-hint {
+            color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .left-controls, .right-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .song-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .song-date {
+                text-align: center;
+            }
+            
+            .translate-plugin {
+                width: 200%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="left-controls">
+                <button class="btn" @click="toggleThemeWithRipple($event)" title="切换暗黑模式">
+                    <span v-if="!isDarkTheme">☀️</span>
+                    <span v-else>🌙</span>
+                </button>
+                <button class="btn" @click="showZhihu" title="显示知乎热榜">
+                    🏠
+                </button>
+                <button class="btn" @click="showSongList" title="显示礼堂金曲">
+                    📕
+                </button>
+                <button class="btn" @click="toggleTranslatePlugin" title="翻译插件">
+                    🌐
+                </button>
+            </div>
+            
+            <div class="right-controls">
+                <div class="time-display">{{ currentTime }}</div>
+            </div>
+        </header>
+        
+        <div class="container">
+            <div class="content-area">
+                <!-- 礼堂金曲列表内容 -->
+                <div v-if="currentView === 'songs'">
+                    <h2>礼堂金曲</h2>
+                    <div class="song-list">
+                        <div v-for="item in songList" :key="item.id" class="song-item">
+                            <div class="song-id">{{ item.id }}</div>
+                            <img class="song-img" src="Img/YYDZ.jpg" />
+                            <div class="song-singer">{{ item.singer }}</div>
+                            <div class="song-name">《{{ item.songName }}》</div>
+                            <div class="song-date">{{ item.date }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 知乎热榜内容 -->
+                <div class="zhihu-hot" v-if="currentView === 'zhihu'">
+                    <h2>知乎热榜</h2>
+                    <div class="zhihu-item" v-for="(item, index) in zhihuHotList" :key="index">
+                        <div class="zhihu-rank">{{ index + 1 }}</div>
+                        <div class="zhihu-title">{{ item.title }}</div>
+                        <div class="zhihu-hotscore">{{ item.hotScore }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 翻译插件 -->
+        <div class="translate-overlay" v-if="showTranslatePlugin" @click="toggleTranslatePlugin"></div>
+        <div class="translate-plugin" v-if="showTranslatePlugin">
+            <div class="translate-header">
+                <div class="translate-title">中英文实时翻译</div>
+                <div class="translate-close" @click="toggleTranslatePlugin">×</div>
+            </div>
+            <textarea 
+                class="translate-input" 
+                v-model="inputText" 
+                :placeholder="languageConfig.translationPlugin.inputPlaceholder"
+                @input="translateText"
+            ></textarea>
+            <div class="translate-output">{{ outputText }}</div>
+            <button class="translate-btn" @click="translateText">{{ languageConfig.translationPlugin.translateButton }}</button>
+            <div class="translate-hint">{{ languageConfig.translationPlugin.hint }}</div>
+        </div>
+
+        <!-- 圆形扩散效果元素 -->
+        <div class="ripple-effect" v-if="showRipple" :style="rippleStyle"></div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed, watch, onMounted, onUnmounted } = Vue;
+        
+        // 语言配置
+        const languagePacks = {
+            zh: {
+                translationPlugin: {
+                    inputPlaceholder: "请输入要翻译的文本...",
+                    translateButton: "翻译",
+                    hint: "提示：输入文本后会自动翻译"
+                }
+            }
+        };
+        
+        // 礼堂金曲数据
+        const songData = [
+            { id: 1, singer: "珍珠·钱艳", songName: "I got hevxi", date: "1992-07-31" },
+            { id: 2, singer: "珍珠·黎磊", songName: "I got hevxi", date: "1987-01-05" },
+            { id: 3, singer: "珍珠·于伟", songName: "I got hevxi", date: "1970-07-21" },
+            { id: 4, singer: "珍珠·邵秀英", songName: "I got hevxi", date: "2010-03-11" },
+            { id: 5, singer: "珍珠·邱绍揆", songName: "I got hevxi", date: "2019-04-21" },
+            { id: 6, singer: "珍珠·冯绍", songName: "I got hevxi", date: "2024-03-18" }
+        ];
+        
+        // 知乎热榜模拟数据
+        const zhihuHotData = {
+            zh: [
+                { title: "如何评价最新发布的智能手机？", hotScore: "1250万热度" },
+                { title: "人工智能将如何改变未来工作方式？", hotScore: "980万热度" },
+                { title: "有哪些值得推荐的学习方法？", hotScore: "876万热度" },
+                { title: "气候变化对全球经济的影响", hotScore: "754万热度" },
+                { title: "最新科幻电影票房破纪录", hotScore: "632万热度" }
+            ]
+        };
+
+        // 模拟翻译函数
+        const translate = (text, from, to) => {
+            // 这里应该是调用翻译API，但为了演示我们使用模拟数据
+            const translations = {
+                "zh-en": {
+                    "你好": "Hello",
+                    "你好！银河":"Hello!The Milky Way",
+                    "世界": "World",
+                    "翻译": "Translation",
+                    "欢迎使用翻译插件": "Welcome to use the translation plugin",
+                    "这是一个测试": "This is a test",
+                    "礼堂金曲": "Hall Golden Songs"
+                },
+                "en-zh": {
+                    "Hello": "你好",
+                    "World": "世界",
+                    "Translation": "翻译",
+                    "Welcome to use the translation plugin": "欢迎使用翻译插件",
+                    "This is a test": "这是一个测试",
+                    "Hall Golden Songs": "礼堂金曲"
+                }
+            };
+            
+            const key = `${from}-${to}`;
+            if (translations[key] && translations[key][text]) {
+                return translations[key][text];
+            }
+            
+            // 如果没有匹配的翻译，返回模拟翻译
+            if (from === 'zh' && to === 'en') {
+                return text + " [It's down]";
+            } else if (from === 'en' && to === 'zh') {
+                return text + " [已完成]";
+            }
+            
+            return text;
+        };
+        
+        createApp({
+            setup() {
+                const currentLanguage = ref('zh');
+                const isDarkTheme = ref(false);
+                const currentView = ref('songs');
+                const showRipple = ref(false);
+                const showTranslatePlugin = ref(false);
+                const inputText = ref("");
+                const outputText = ref("");
+                const currentTime = ref("");
+                const rippleStyle = reactive({
+                    left: '0px',
+                    top: '0px'
+                });
+                
+                let timeInterval = null;
+                
+                // 根据当前语言返回对应的语言包
+                const languageConfig = computed(() => {
+                    return languagePacks[currentLanguage.value];
+                });
+                
+                // 礼堂金曲数据
+                const songList = computed(() => {
+                    return songData;
+                });
+                
+                // 知乎热榜数据
+                const zhihuHotList = computed(() => {
+                    return zhihuHotData[currentLanguage.value];
+                });
+                
+                // 更新时间显示
+                const updateTime = () => {
+                    const now = new Date();
+                    if (currentLanguage.value === 'zh') {
+                        currentTime.value = now.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            /* second: '2-digit', */
+                            hour12: false
+                        });
+                    } else {
+                        currentTime.value = now.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+                    }
+                };
+                
+                // 创建圆形扩散效果
+                const createRipple = (event) => {
+                    const x = event.clientX;
+                    const y = event.clientY;
+                    
+                    rippleStyle.left = `${x}px`;
+                    rippleStyle.top = `${y}px`;
+                    
+                    showRipple.value = true;
+                    
+                    setTimeout(() => {
+                        showRipple.value = false;
+                    }, 600);
+                };
+                
+                // 切换主题（带圆形扩散效果）
+                const toggleThemeWithRipple = (event) => {
+                    createRipple(event);
+                    setTimeout(() => {
+                        toggleTheme();
+                    }, 300);
+                };
+                
+                // 切换主题
+                const toggleTheme = () => {
+                    isDarkTheme.value = !isDarkTheme.value;
+                    document.body.classList.toggle('dark-theme', isDarkTheme.value);
+                    
+                    // 保存主题偏好到localStorage
+                    localStorage.setItem('theme', isDarkTheme.value ? 'dark' : 'light');
+                };
+                
+                // 更改语言
+                const changeLanguage = () => {
+                    // 保存语言偏好到localStorage
+                    localStorage.setItem('language', currentLanguage.value);
+                    // 语言切换时重新翻译
+                    translateText();
+                    updateTime();
+                };
+                
+                // 显示知乎热榜
+                const showZhihu = () => {
+                    currentView.value = 'zhihu';
+                };
+                
+                // 显示礼堂金曲列表
+                const showSongList = () => {
+                    currentView.value = 'songs';
+                };
+                
+                // 切换翻译插件显示
+                const toggleTranslatePlugin = () => {
+                    showTranslatePlugin.value = !showTranslatePlugin.value;
+                };
+                
+                // 翻译文本
+                const translateText = () => {
+                    if (!inputText.value.trim()) {
+                        outputText.value = "";
+                        return;
+                    }
+                    
+                    const from = currentLanguage.value === 'zh' ? 'zh' : 'en';
+                    const to = currentLanguage.value === 'zh' ? 'en' : 'zh';
+                    
+                    // 模拟翻译过程
+                    setTimeout(() => {
+                        outputText.value = translate(inputText.value, from, to);
+                    }, 300);
+                };
+                
+                // 初始化时从localStorage读取用户偏好
+                const initPreferences = () => {
+                    const savedTheme = localStorage.getItem('theme');
+                    const savedLanguage = localStorage.getItem('language');
+                    
+                    if (savedTheme === 'dark') {
+                        isDarkTheme.value = true;
+                        document.body.classList.add('dark-theme');
+                    }
+                    
+                    if (savedLanguage) {
+                        currentLanguage.value = savedLanguage;
+                    }
+                };
+                
+                onMounted(() => {
+                    // 初始化偏好设置
+                    initPreferences();
+                    
+                    // 设置时间更新间隔
+                    updateTime();
+                    timeInterval = setInterval(updateTime, 1000);
+                });
+                
+                onUnmounted(() => {
+                    // 清除定时器
+                    if (timeInterval) {
+                        clearInterval(timeInterval);
+                    }
+                });
+                
+                // 监听输入文本变化
+                watch(inputText, translateText);
+                
+                return {
+                    currentLanguage,
+                    isDarkTheme,
+                    currentView,
+                    showRipple,
+                    showTranslatePlugin,
+                    inputText,
+                    outputText,
+                    currentTime,
+                    rippleStyle,
+                    languageConfig,
+                    songList,
+                    zhihuHotList,
+                    toggleThemeWithRipple,
+                    changeLanguage,
+                    showZhihu,
+                    showSongList,
+                    toggleTranslatePlugin,
+                    translateText
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
